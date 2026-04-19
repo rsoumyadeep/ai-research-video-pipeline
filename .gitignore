@@ -2,14 +2,16 @@
 __pycache__/
 *.pyc
 
-# Virtual env
+# Virtual environment
 venv/
-.env
 
 # Data outputs
 data/
-logs/
 
-# OS
+# Secrets (VERY IMPORTANT)
+config/client_secret.json
+config/*.json
+
+# OS files
 .DS_Store
 Thumbs.db

@@ -1,0 +1,293 @@
+AI Research Video Pipeline — Project Summary
+
+1. PROJECT GOAL
+
+---
+
+Build a fully automated pipeline that:
+
+* Takes user-defined research topics
+* Fetches latest papers (arXiv)
+* Generates summaries (LLM via Ollama)
+* Converts summaries into scripts
+* Converts scripts into audio (TTS)
+* (Next) Converts audio into video
+* (Future) Uploads to YouTube automatically
+
+Pipeline Flow:
+topics → fetch → summary → script → audio → video → upload
+
+---
+
+2. PROJECT STRUCTURE
+
+---
+
+ai-research-video-pipeline/
+│
+├── src/
+│   ├── fetch/
+│   │   └── arxiv.py              # Fetch papers from arXiv
+│   │
+│   ├── summarize/
+│   │   ├── llm.py               # Generate summary using Ollama
+│   │   └── script.py            # Convert summary → script
+│   │
+│   ├── tts/
+│   │   └── generate_audio.py    # Convert script → audio
+│   │
+│   ├── video/                   # 
+│   ├── upload/                  # 
+│   ├── utils/
+│   │   └── storage.py           # Save results to JSON
+│   │
+│   └── pipeline.py              # Main orchestrator
+│
+├── scripts/
+│   └── input_topics.py          # CLI to input/update topics
+│
+├── config/
+│   └── topics.json              # Stores user topics
+│
+├── data/
+│   └── YYYY-MM-DD/              # Outputs (json + audio)
+│
+├── venv/                        # Virtual environment
+├── requirements.txt
+└── README.md
+
+---
+
+3. KEY MODULES & FUNCTIONS
+
+---
+
+## (A) Topic Input
+
+File: scripts/input_topics.py
+
+Functions:
+
+* get_user_topics()
+* save_topics()
+
+Purpose:
+
+* Takes user input
+* Stores topics in config/topics.json
+
+---
+
+## (B) Fetch Papers
+
+File: src/fetch/arxiv.py
+
+Function:
+
+* fetch_papers(topic, max_results=5)
+
+Key Points:
+
+* Uses arXiv API
+* Uses requests + feedparser
+* Includes User-Agent header
+* Uses category + keyword query
+* Returns list of papers:
+  {
+  id, title, summary, published, link
+  }
+
+---
+
+## (C) Summary (LLM)
+
+File: src/summarize/llm.py
+
+Function:
+
+* generate_summary(title, abstract)
+
+Uses:
+
+* Ollama API (http://localhost:11434)
+
+Pipeline:
+prompt → Ollama → structured summary
+
+---
+
+## (D) Script Generation
+
+File: src/summarize/script.py
+
+Function:
+
+* generate_script(title, summary)
+
+Converts:
+
+* Structured summary → natural YouTube script
+
+---
+
+## (E) Text-to-Speech (TTS)
+
+File: src/tts/generate_audio.py
+
+Function:
+
+* generate_audio(text, output_path)
+
+Uses:
+
+* pyttsx3 (offline TTS)
+
+Output:
+
+* .wav file
+
+---
+
+## (F) Storage
+
+File: src/utils/storage.py
+
+Function:
+
+* save_papers(results)
+
+Stores:
+
+* topic
+* paper
+* summary
+* script
+* audio_path
+
+Saved in:
+data/YYYY-MM-DD/papers.json
+
+---
+
+## (G) Main Pipeline
+
+File: src/pipeline.py
+
+Functions:
+
+* load_topics()
+* get_top_paper()
+* run_pipeline()
+
+Flow inside run_pipeline():
+
+FOR each topic:
+fetch papers
+select top paper
+generate summary (LLM)
+generate script (LLM)
+generate audio (TTS)
+store results
+print outputs
+
+---
+
+4. SYSTEM DEPENDENCIES
+
+---
+
+Core:
+
+* Python 3.11
+* Virtual environment (venv)
+
+Libraries:
+
+* requests
+* feedparser
+* pyttsx3
+
+External:
+
+* Ollama (local LLM server)
+  Command:
+  ollama serve
+
+---
+
+5. CURRENT STATUS
+
+---
+
+Completed:
+
+* Topic input system ✅
+* arXiv fetch system ✅
+* LLM summarization (Ollama) ✅
+* Script generation ✅
+* Audio generation (TTS) ✅
+* Data storage ✅
+
+In Progress:
+
+* Video generation (FFmpeg) ⏳
+
+Future:
+
+* YouTube upload automation
+* Scheduling (cron / Task Scheduler)
+* Better ranking of papers
+
+---
+
+6. IMPORTANT CONCEPTS LEARNED
+
+---
+
+* Virtual environments (venv)
+* API handling (arXiv, Ollama)
+* System design (modular pipeline)
+* LLM integration (local inference)
+* Debugging real-world issues
+* Tradeoffs (Coqui TTS vs pyttsx3)
+
+---
+
+7. HOW TO RUN PROJECT
+
+---
+
+Step 1: Activate environment
+source venv/Scripts/activate
+
+Step 2: Ensure Ollama is running
+ollama serve
+
+Step 3: Run pipeline
+python src/pipeline.py
+
+---
+
+8. FINAL ARCHITECTURE
+
+---
+
+User Topics
+↓
+Fetch Papers (arXiv)
+↓
+LLM Summary (Ollama)
+↓
+Script Generation
+↓
+Audio Generation (TTS)
+↓
+Storage (JSON + WAV)
+↓
+(Next) Video Generation
+↓
+(Future) YouTube Upload
+
+---
+
+END OF SUMMARY
